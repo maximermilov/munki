@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Wrapper to launch managedsoftwareupdate
+
+BASEDIR=$(dirname $0)
+TOOLPATH="${BASEDIR}/managedsoftwareupdate.app/Contents/MacOS/managedsoftwareupdate"
+
+# call the embedded binary and forward all arguments
+"$TOOLPATH" "$@"

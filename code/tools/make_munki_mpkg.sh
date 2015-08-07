@@ -107,9 +107,9 @@ if [ ! -x "/usr/bin/xcodebuild" ]; then
 fi
 
 # Get the munki version.
-MUNKIVERS=`defaults read "$MUNKIROOT/code/client/munkilib/version" CFBundleShortVersionString`
+MUNKIVERS=`defaults read "$MUNKIROOT/code/client/managedsoftwareupdatetool/managedsoftwareupdatetool/munkilib/version" CFBundleShortVersionString`
 if [ "$?" != "0" ]; then
-    echo "$MUNKIROOT/code/client/munkilib/version is missing!" 1>&2
+    echo "$MUNKIROOT/code/client/managedsoftwareupdatetool/managedsoftwareupdatetool/munkilib/version.plist is missing!" 1>&2
     echo "Perhaps $MUNKIROOT does not contain the munki source?"  1>&2
     exit 1
 fi
@@ -172,6 +172,29 @@ echo "  Apps package version: $APPSVERSION"
 echo
 echo "  metapackage version: $MPKGVERSION"
 echo
+
+
+# Build managedsoftwareupdatetool
+echo "Building managedsoftwareupdatetool.xcodeproj..."
+pushd "$MUNKIROOT/code/client/managedsoftwareupdatetool" > /dev/null
+/usr/bin/xcodebuild -project "managedsoftwareupdate.xcodeproj" -alltargets clean > /dev/null
+/usr/bin/xcodebuild -project "managedsoftwareupdate.xcodeproj" -alltargets build > /dev/null
+XCODEBUILD_RESULT="$?"
+popd > /dev/null
+if [ "$XCODEBUILD_RESULT" -ne 0 ]; then
+    echo "Error building managedsoftwareupdate.app: $XCODEBUILD_RESULT"
+    exit 2
+fi
+
+MSUTOOL="$MUNKIROOT/code/client/managedsoftwareupdatetool/build/Release/managedsoftwareupdate.app"
+if [ ! -e "$MSUTOOL" ]; then
+    echo "Need a release build of managedsoftwareupdate.app!"
+    echo "Open the Xcode project $MUNKIROOT/code/client/managedsoftwareupdatetool/managedsoftwareupdate.xcodeproj and build it."
+    exit 2
+else
+    MSUTOOLVERSION=`defaults read "$MSUTOOL/Contents/Info" CFBundleShortVersionString`
+    echo "managedsoftwareupdate.app version: $MSUTOOLVERSION"
+fi
 
 # Build Managed Software Center.
 echo "Building Managed Software Update.xcodeproj..."
@@ -278,18 +301,16 @@ echo "Creating core package template..."
 # Create directory structure.
 COREROOT="$PKGTMP/munki_core"
 mkdir -m 1775 "$COREROOT"
-mkdir -p "$COREROOT/usr/local/munki/munkilib"
+mkdir -p "$COREROOT/usr/local/munki/"
 chmod -R 755 "$COREROOT/usr"
 # Copy command line utilities.
+cp -XR "$MSUTOOL" "$COREROOT/usr/local/munki/"
 # edit this if list of tools changes!
-for TOOL in launchapp logouthelper managedsoftwareupdate supervisor ptyexec
+for ITEM in launchapp logouthelper managedsoftwareupdate supervisor ptyexec munkilib
 do
-	cp -X "$MUNKIROOT/code/client/$TOOL" "$COREROOT/usr/local/munki/" 2>&1
+	cp -XPR "$MUNKIROOT/code/client/$ITEM" "$COREROOT/usr/local/munki/" 2>&1
 done
-# Copy python library.
-cp -X "$MUNKIROOT/code/client/munkilib/"*.py "$COREROOT/usr/local/munki/munkilib/"
-# Copy munki version.
-cp -X "$MUNKIROOT/code/client/munkilib/version.plist" "$COREROOT/usr/local/munki/munkilib/"
+
 # svnversion file was used when we were using subversion
 # we don't need this file if we have an updated get_version method in munkicommon.py
 if [ "$SVNREV" -lt "1302" ]; then
@@ -341,7 +362,7 @@ chmod -R 755 "$ADMINROOT/usr"
 # edit this if list of tools changes!
 for TOOL in makecatalogs makepkginfo manifestutil munkiimport
 do
-	cp -X "$MUNKIROOT/code/client/$TOOL" "$ADMINROOT/usr/local/munki/" 2>&1
+	cp -XPR "$MUNKIROOT/code/client/$TOOL" "$ADMINROOT/usr/local/munki/" 2>&1
 done
 # Set permissions.
 chmod -R go-w "$ADMINROOT/usr/local/munki"
@@ -533,6 +554,10 @@ for pkg in core admin app launchd; do
             ver="$LAUNCHDVERSION"
             SCRIPTS=""
             ;;
+        "core")
+            ver="$VERSION"
+            SCRIPTS="${MUNKIROOT}/code/pkgtemplate/Scripts_core"
+            ;;
         *)
             ver="$VERSION"
             SCRIPTS=""
@@ -547,7 +572,7 @@ for pkg in core admin app launchd; do
         --analyze \
         --root "$PKGTMP/munki_$pkg" \
         "${PKGTMP}/munki_${pkg}_component.plist"
-    if [ "$pkg" == "app" ]; then
+    if [ "$pkg" == "core" -o "$pkg" == "app" ]; then
         # change BundleIsRelocatable from true to false
         sudo /usr/libexec/PlistBuddy \
             -c 'Set :0:BundleIsRelocatable false' \

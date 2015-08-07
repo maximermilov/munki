@@ -62,7 +62,7 @@
 		C082C0F61B72B6C100B11EE5 = {
 			isa = PBXGroup;
 			children = (
-				C082C1081B72B6C100B11EE5 /* managedsoftwareupdate */,
+				C082C1081B72B6C100B11EE5 /* managedsoftwareupdatetool */,
 				C082C1011B72B6C100B11EE5 /* Frameworks */,
 				C082C1001B72B6C100B11EE5 /* Products */,
 			);
@@ -94,7 +94,7 @@
 			name = "Other Frameworks";
 			sourceTree = "<group>";
 		};
-		C082C1081B72B6C100B11EE5 /* managedsoftwareupdate */ = {
+		C082C1081B72B6C100B11EE5 /* managedsoftwareupdatetool */ = {
 			isa = PBXGroup;
 			children = (
 				C02636661B73C371006523D6 /* ptyexec */,
@@ -110,7 +110,6 @@
 				C082C1101B72B6C100B11EE5 /* SharedLibraries */,
 				C082C1091B72B6C100B11EE5 /* Supporting Files */,
 			);
-			name = managedsoftwareupdate;
 			path = managedsoftwareupdatetool;
 			sourceTree = "<group>";
 		};

@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# Installer won't replace a directory with a symlink so we have to remove
+# the dir beforehand
+
+if [ -d "$3/usr/local/munki/munkilib" ] ; then
+    /bin/rm -r "$3/usr/local/munki/munkilib"
+fi

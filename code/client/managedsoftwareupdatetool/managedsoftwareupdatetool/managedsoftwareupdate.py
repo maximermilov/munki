@@ -220,6 +220,9 @@ def doInstallTasks(do_apple_updates, only_unattended=False):
         # install munki updates
         try:
             munki_need_to_restart = installer.run(only_unattended=only_unattended)
+        except KeyboardInterrupt:
+            munkicommon.savereport()
+            raise
         except:
             munkicommon.display_error('Unexpected error in munkilib.installer:')
             munkicommon.log(traceback.format_exc())
@@ -231,6 +234,9 @@ def doInstallTasks(do_apple_updates, only_unattended=False):
         try:
             apple_need_to_restart = appleupdates.installAppleUpdates(
                                             only_unattended=only_unattended)
+        except KeyboardInterrupt:
+            munkicommon.savereport()
+            raise
         except:
             munkicommon.display_error(
                 'Unexpected error in appleupdates.installAppleUpdates:')
@@ -626,8 +632,9 @@ def main():
 
     munkicommon.log("### Starting managedsoftwareupdate run: %s ###" % runtype)
     if options.verbose:
-        print 'Managed Software Update Tool'
-        print 'Copyright 2010-2014 The Munki Project'
+        print ('Managed Software Update Tool version %s'
+               % munkicommon.get_version())
+        print 'Copyright 2010-2015 The Munki Project'
         print 'https://github.com/munki/munki\n'
 
     munkicommon.display_status_major('Starting...')
@@ -732,6 +739,9 @@ def main():
     if not skip_munki_check:
         try:
             updatecheckresult = updatecheck.check(client_id=options.id)
+        except KeyboardInterrupt:
+            munkicommon.savereport()
+            raise
         except:
             munkicommon.display_error('Unexpected error in updatecheck:')
             munkicommon.log(traceback.format_exc())
@@ -786,6 +796,9 @@ def main():
                     appleupdates.appleSoftwareUpdatesAvailable(
                         forcecheck=force_update_check, client_id=options.id,
                         forcecatalogrefresh=force_catalog_refresh)
+            except KeyboardInterrupt:
+                munkicommon.savereport()
+                raise
             except:
                 munkicommon.display_error('Unexpected error in appleupdates:')
                 munkicommon.log(traceback.format_exc())
@@ -807,6 +820,9 @@ def main():
                 appleupdatesavailable = \
                     appleupdates.appleSoftwareUpdatesAvailable(
                         suppresscheck=True, client_id=options.id)
+            except KeyboardInterrupt:
+                munkicommon.savereport()
+                raise
             except:
                 munkicommon.display_error('Unexpected error in appleupdates:')
                 munkicommon.log(traceback.format_exc())
@@ -914,6 +930,9 @@ def main():
                     appleupdatesavailable = \
                         appleupdates.appleSoftwareUpdatesAvailable(
                             suppresscheck=True, client_id=options.id)
+                except KeyboardInterrupt:
+                    munkicommon.savereport()
+                    raise
                 except:
                     munkicommon.display_error(
                         'Unexpected error in appleupdates:')
