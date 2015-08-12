@@ -188,7 +188,7 @@ class MSUStatusWindowController(NSObject):
         '''Monitors managedsoftwareupdate process for failure to start
         or unexpected exit, so we're not waiting around forever if
         managedsoftwareupdate isn't running.'''
-        PYTHON_SCRIPT_NAME = 'managedsoftwareupdate'
+        #PYTHON_SCRIPT_NAME = 'managedsoftwareupdate'
         NEVER_STARTED = -2
         UNEXPECTEDLY_QUIT = -1
 
@@ -201,7 +201,7 @@ class MSUStatusWindowController(NSObject):
             self.saw_process = True
             # clear the flag so we have to get another status update
             self.got_status_update = False
-        elif munki.pythonScriptRunning(PYTHON_SCRIPT_NAME):
+        elif munki.managedsoftwareupdate_running():
             self.timeout_counter = 6
             self.saw_process = True
         else:

@@ -411,6 +411,40 @@ def justUpdate():
         return 1
 
 
+def managedsoftwareupdate_running(
+    toolname='managedsoftwareupdate.app/Contents/MacOS/managedsoftwareupdate'):
+    """Returns True if another instance of the managedsoftwareupdate tool is 
+    running"""
+    cmd = ['/bin/ps', '-eo', 'pid=,command=']
+    proc = subprocess.Popen(cmd, shell=False, bufsize=-1,
+                            stdin=subprocess.PIPE,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    (out, dummy_err) = proc.communicate()
+    mypid = os.getpid()
+    lines = str(out).splitlines()
+    for line in lines:
+        try:
+            (pid, process) = line.split(None, 1)
+        except ValueError:
+            # funky process line, so we'll skip it
+            pass
+        else:
+            args = process.split()
+            try:
+                if args[0].find(toolname) != -1:
+                    try:
+                        if int(pid) != int(mypid):
+                            return pid
+                    except ValueError:
+                        # pid must have some funky characters
+                        pass
+            except IndexError:
+                pass
+    # if we get here we didn't find a Python script with scriptname
+    # (other than ourselves)
+    return 0
+
+
 def pythonScriptRunning(scriptname):
     """Returns Process ID for a running python script"""
     cmd = ['/bin/ps', '-eo', 'pid=,command=']

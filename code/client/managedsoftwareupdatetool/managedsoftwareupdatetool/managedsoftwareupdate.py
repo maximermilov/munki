@@ -632,8 +632,8 @@ def main():
 
     munkicommon.log("### Starting managedsoftwareupdate run: %s ###" % runtype)
     if options.verbose:
-        print ('Managed Software Update Tool version %s'
-               % munkicommon.get_version())
+        print 'Managed Software Update Tool'
+        print 'Version %s' % munkicommon.get_version()
         print 'Copyright 2010-2015 The Munki Project'
         print 'https://github.com/munki/munki\n'
 
@@ -667,8 +667,7 @@ def main():
         exit(munkicommon.EXIT_STATUS_MUNKI_DIRS_FAILURE)
 
     # check to see if another instance of this script is running
-    myname = os.path.basename(sys.argv[0])
-    if munkicommon.pythonScriptRunning(myname):
+    if munkicommon.managedsoftwareupdate_running():
         # another instance of this script is running, so we should quit
         if options.manualcheck:
             # a manual update check was triggered
@@ -678,7 +677,7 @@ def main():
             munkistatus.message('Checking for available updates...')
             while True:
                 # loop til the other instance exits
-                if not munkicommon.pythonScriptRunning(myname):
+                if not munkicommon.managedsoftwareupdate_running():
                     break
                 # or user clicks Stop
                 if munkicommon.stopRequested():
@@ -687,6 +686,7 @@ def main():
 
             munkistatus.quit()
         else:
+            myname = os.path.basename(sys.argv[0])
             msg = 'Another instance of %s is running. Exiting.' % myname
             munkicommon.log(msg)
             print >> sys.stderr, msg
