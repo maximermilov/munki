@@ -37,7 +37,9 @@ except ImportError:
     # Python is missing ObjC bindings. Run external report script.
     from munkilib import utils
     print >> sys.stderr, 'Python is missing ObjC bindings.'
-    scriptdir = os.path.realpath(os.path.dirname(sys.argv[0]))
+    scriptdir = os.path.realpath(
+        os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.dirname(sys.argv[0])))))
     script = os.path.join(scriptdir, 'report_broken_client')
     try:
         result, stdout, stderr = utils.runExternalScript(script)
@@ -458,7 +460,9 @@ def main():
     signal.signal(signal.SIGTERM, signal_handler)
 
     # save this for later
-    scriptdir = os.path.realpath(os.path.dirname(sys.argv[0]))
+    scriptdir = os.path.realpath(
+        os.path.dirname(os.path.dirname(os.path.dirname(
+        os.path.dirname(sys.argv[0])))))
 
     p = optparse.OptionParser()
     p.set_usage("""Usage: %prog [options]""")
